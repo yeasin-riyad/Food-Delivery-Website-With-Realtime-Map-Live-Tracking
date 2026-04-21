@@ -204,7 +204,7 @@ export default function MultiStepSignUp() {
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -50 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.3 }}
         >
           {step === 1 && (
             <div className="space-y-4">
@@ -286,7 +286,7 @@ export default function MultiStepSignUp() {
                       border: `1px solid ${borderColor}`,
                     }}
                   >
-                    {r}
+                    {r[0].toUpperCase() + r.slice(1)}
                   </button>
                 ))}
               </div>
