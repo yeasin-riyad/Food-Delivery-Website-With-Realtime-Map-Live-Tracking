@@ -156,7 +156,7 @@ export default function MultiStepSignIn() {
               className="w-full py-3 rounded-xl text-white"
               style={{ backgroundColor: primaryColor }}
             >
-              Send Reset Link
+              Send OTP
             </button>
 
             <button

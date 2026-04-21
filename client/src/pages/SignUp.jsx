@@ -154,6 +154,7 @@
 import React, { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { motion } from "motion/react";
+import api from "../api";
 
 export default function MultiStepSignUp() {
   const primaryColor = "#ff4d2d";
@@ -171,6 +172,22 @@ export default function MultiStepSignUp() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // 👉 এখানে formData-তে fullName, email, mobile, password, role সব আছে
+    if (!formData.fullName || !formData.email || !formData.mobile || !formData.password) {
+      alert("Please fill in all fields");
+      return;
+    }
+    api.post("/api/auth/signup", formData)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   const nextStep = () => setStep((prev) => prev + 1);
@@ -315,6 +332,7 @@ export default function MultiStepSignUp() {
             </button>
           ) : (
             <button
+            onClick={handleSubmit}
               className="ml-auto px-4 py-2 rounded-lg text-white"
               style={{ backgroundColor: primaryColor }}
             >
