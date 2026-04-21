@@ -1,6 +1,6 @@
 import { Route, Routes } from "react-router-dom"
 import SignUp from "./pages/SignUp.jsx"
-import SignIn from "./pages/SignIn.jsx"
+import MultiStepSignIn from "./pages/MultiStepSignIn.jsx"
 
 
 function App() {
@@ -9,7 +9,7 @@ function App() {
   <Routes>
     {/* Define your routes here */}
     <Route path="/signup" element={<SignUp />} />
-    <Route path="/signin" element={<SignIn />} />
+    <Route path="/signin" element={<MultiStepSignIn />} />
   </Routes>
   )
 }

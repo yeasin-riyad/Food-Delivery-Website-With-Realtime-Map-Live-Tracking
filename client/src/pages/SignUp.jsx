@@ -204,13 +204,15 @@ export default function MultiStepSignUp() {
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -50 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5 }}
         >
           {step === 1 && (
             <div className="space-y-4">
               <input
                 type="text"
                 name="fullName"
+                required
+                value={formData?.fullName}
                 placeholder="Full Name"
                 onChange={handleChange}
                 className="w-full border px-3 py-2 rounded-lg"
@@ -220,7 +222,9 @@ export default function MultiStepSignUp() {
               <input
                 type="email"
                 name="email"
+                required
                 placeholder="Email"
+                value={formData?.email}
                 onChange={handleChange}
                 className="w-full border px-3 py-2 rounded-lg"
                 style={{ border: `1px solid ${borderColor}` }}
@@ -231,10 +235,12 @@ export default function MultiStepSignUp() {
           {step === 2 && (
             <div className="space-y-4">
               <input
+                required
                 type="number"
                 inputMode="numeric"
                 name="mobile"
                 placeholder="Mobile Number"
+                value={formData?.mobile}
                 onChange={handleChange}
                 className="w-full border px-3 py-2 rounded-lg"
                 style={{ border: `1px solid ${borderColor}` }}
@@ -244,7 +250,9 @@ export default function MultiStepSignUp() {
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
+                  required
                   placeholder="Password"
+                 value={formData?.password}
                   onChange={handleChange}
                   className="w-full border px-3 py-2 rounded-lg"
                   style={{ border: `1px solid ${borderColor}` }}
