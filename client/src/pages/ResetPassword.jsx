@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import api from "../api";
 
 export default function ResetPassword() {
   const primaryColor = "#ff4d2d";
   const borderColor = "#ddd";
   const navigate = useNavigate();
+  const location=useLocation();
+  console.log(location.state?.email)
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -17,6 +20,23 @@ export default function ResetPassword() {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  const handleResetPassword = (e) => {
+    e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+    api.post("/api/auth/reset-password", {email:location.state?.email, password: formData.password })
+    .then(res => {
+      alert("Password reset successful! Please sign in with your new password.");
+      navigate("/signin");
+    })
+    .catch(err => {
+      alert("Error: " + err.response.data.message);
+    });
+  };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-[#fff9f6]">
@@ -63,10 +83,11 @@ export default function ResetPassword() {
 
         <button
         disabled={!formData.password || formData.password !== formData.confirmPassword}
-        onClick={() => navigate("/signin")}
+     
           className={`w-full py-3 rounded-xl text-white mb-3 ${!formData.password || formData.password !== formData.confirmPassword ? "bg-gray-400 cursor-not-allowed" : ""}`}  
-          onClick={() => navigate("/signin")}
+
           style={{ backgroundColor: primaryColor }}
+            onClick={handleResetPassword}
         >
           Update Password
         </button>

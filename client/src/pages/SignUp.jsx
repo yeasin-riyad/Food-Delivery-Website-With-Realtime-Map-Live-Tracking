@@ -155,6 +155,7 @@ import React, { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { motion } from "motion/react";
 import api from "../api";
+import { useNavigate } from "react-router-dom";
 
 export default function MultiStepSignUp() {
   const primaryColor = "#ff4d2d";
@@ -169,6 +170,7 @@ export default function MultiStepSignUp() {
     password: "",
     role: "user",
   });
+    const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -183,7 +185,8 @@ export default function MultiStepSignUp() {
     }
     api.post("/api/auth/signup", formData)
       .then((response) => {
-        console.log(response.data);
+        // console.log(response.data);
+        navigate("/signin");
       })
       .catch((error) => {
         console.error(error);

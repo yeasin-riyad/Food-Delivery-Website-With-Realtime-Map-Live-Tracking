@@ -5,6 +5,9 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import cookieParser from 'cookie-parser';
 import authRoute from './routes/auth.routes.js';
+import { verifySMTP } from './utils/mail.js';
+
+
 
 
 // Load environment variables from .env file
@@ -58,5 +61,7 @@ const PORT = process.env.PORT || 8000;
 server.listen(PORT, () => {
     // Connect to the database
     connectDB();
+    //Verify SMTP connection when the server starts
+    verifySMTP();
   console.log(`Server is running on port ${PORT}`);
 });

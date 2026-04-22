@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { motion } from "framer-motion";
+import api from "../api";
+import { useNavigate } from "react-router-dom";
 
 export default function MultiStepSignIn() {
   const primaryColor = "#ff4d2d";
@@ -9,6 +11,7 @@ export default function MultiStepSignIn() {
   const [view, setView] = useState("signin"); // signin | forgot | success
   const [step, setStep] = useState(1); // 1: email, 2: password
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -18,6 +21,30 @@ export default function MultiStepSignIn() {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  const handleSignin = (e) => {
+    e.preventDefault();
+    api.post("/api/auth/signin", formData)
+    .then(res => {
+      alert("Signin successful! Token: " + res.data.token);
+    })
+    .catch(err => {
+      alert("Signin failed: " + err.response.data.message);
+    });
+  
+  };
+
+  const handleForgotPassword = (e) => {
+    e.preventDefault();
+    api.post("/api/auth/send-otp", { email: formData.email })
+    .then(res => {
+      alert("OTP sent to email!");
+      setView("success");
+    })
+    .catch(err => {
+      alert("Error: " + err.response.data.message);
+    });
+  }
 
   const nextStep = () => setStep((s) => Math.min(2, s + 1));
   const prevStep = () => setStep((s) => Math.max(1, s - 1));
@@ -127,6 +154,7 @@ export default function MultiStepSignIn() {
                 </button>
               ) : (
                 <button
+                onClick={handleSignin}
                   className="ml-auto px-5 py-2.5 rounded-xl text-white"
                   style={{ backgroundColor: primaryColor }}
                 >
@@ -141,7 +169,7 @@ export default function MultiStepSignIn() {
         {view === "forgot" && (
           <>
             <p className="text-gray-500 mb-6">
-              Enter your email to receive a reset link
+              Enter your email to receive otp for password reset
             </p>
 
             <input
@@ -152,7 +180,7 @@ export default function MultiStepSignIn() {
             />
 
             <button
-              onClick={() => setView("success")}
+              onClick={handleForgotPassword}
               className="w-full py-3 rounded-xl text-white"
               style={{ backgroundColor: primaryColor }}
             >
@@ -176,18 +204,19 @@ export default function MultiStepSignIn() {
         {view === "success" && (
           <>
             <p className="text-green-600 mb-6">
-              Reset link sent! Check your email.
+              Otp sent! Check your email.
             </p>
 
             <button
               onClick={() => {
-                setView("signin");
-                setStep(1);
+                navigate("/verify-otp",{
+                  state:{email: formData?.email}
+                });
               }}
               className="w-full py-3 rounded-xl text-white"
               style={{ backgroundColor: primaryColor }}
             >
-              Back to Sign in
+              Verify OTP
             </button>
           </>
         )}

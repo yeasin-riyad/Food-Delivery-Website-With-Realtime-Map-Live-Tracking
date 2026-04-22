@@ -1,5 +1,5 @@
 import express from "express";
-import { signUp,signIn,signOut } from "../controllers/auth.controllers.js";
+import { signUp,signIn,signOut, sendOtp, verifyOtp, resetPassword } from "../controllers/auth.controllers.js";
 
 const authRoute = express.Router();
 
@@ -11,5 +11,15 @@ authRoute.post("/signin", signIn);
 
 // Sign Out route
 authRoute.get("/signout", signOut);
+
+// Send OTP route
+authRoute.post("/send-otp", sendOtp);
+
+// Verify OTP route
+authRoute.post("/verify-otp", verifyOtp);
+
+// Reset Password route
+authRoute.post("/reset-password", resetPassword);
+
 
 export default authRoute;

@@ -1,9 +1,12 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import api from "../api";
+import { useEffect } from "react";
 
 export default function OtpVerify() {
   const primaryColor = "#ff4d2d";
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [otp, setOtp] = useState(["", "", "", ""]);
 
@@ -19,6 +22,29 @@ export default function OtpVerify() {
       document.getElementById(`otp-${index + 1}`).focus();
     }
   };
+  const email = location.state?.email;
+
+  const handleVerifyOtp = (e) => {
+    e.preventDefault();
+    api.post("/api/auth/verify-otp", { otp: otp.join(""),email })
+    .then(res => {
+      alert("OTP verified! You can now reset your password.");
+      navigate("/reset-password",{
+        state: { email }
+      });
+    })
+    .catch(err => {
+      alert("OTP verification failed: " + err.response.data.message);
+    });
+  };
+
+  useEffect(() => {
+    if (!email) {
+      // যদি direct URL দিয়ে আসে → redirect back
+      navigate("/signin");
+    }
+  }, [email, navigate]);
+
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-[#fff9f6]">
@@ -50,7 +76,7 @@ export default function OtpVerify() {
 
         <button
         disabled={otp.some((d) => d === "")}
-          onClick={() => navigate("/reset-password")}
+        onClick={handleVerifyOtp}
           className={`w-full py-3 rounded-xl text-white mb-3 ${otp.some((d) => d === "") ? "bg-gray-400 cursor-not-allowed" : ""}`}
           style={{ backgroundColor: primaryColor }}
         >
