@@ -1,11 +1,37 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
+import api from "../api";
+import { useState } from "react";
+import { useEffect } from "react";
 
 export default function AuthLanding() {
-  const navigate = useNavigate();
+      const primaryColor = "#ff4d2d";
 
-  const primaryColor = "#ff4d2d";
+   const navigate = useNavigate();
+  const location = useLocation();
+
+  const [error, setError] = useState("");
+
+  const handleGoogleLogin = () => {
+    try {
+      setError("");
+      window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/google`;
+    } catch {
+      setError("Failed to start Google login");
+    }
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const err = params.get("error");
+
+    if (err) {
+      setError("Google login failed. Please try again.");
+    }
+  }, [location]);
+
+   
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-[#fff9f6]">
@@ -24,12 +50,21 @@ export default function AuthLanding() {
         </p>
 
         {/* Google Login */}
-        <button
+       <div>
+         <button
+        onClick={handleGoogleLogin}
           className="w-full flex items-center justify-center gap-3 border rounded-xl py-3 mb-4 hover:shadow-md transition"
         >
           <FcGoogle size={20} />
           Continue with Google
         </button>
+
+            {error && (
+        <p className="mt-4 text-red-500 text-sm">
+          {error}
+        </p>
+      )}
+       </div>
 
         {/* Divider */}
         <div className="flex items-center my-6">

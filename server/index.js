@@ -6,6 +6,7 @@ import connectDB from './config/db.js';
 import cookieParser from 'cookie-parser';
 import authRoute from './routes/auth.routes.js';
 import { verifySMTP } from './utils/mail.js';
+import userRouter from './routes/user.routes.js';
 
 
 
@@ -44,7 +45,7 @@ app.use(express.json());
 app.use(cookieParser());
 // Use the authentication routes
 app.use('/api/auth', authRoute);
-
+app.use('/api/user', userRouter);
 // Define a simple route for testing
 app.get('/', (req, res) => {
     res.send('Welcome to the Food Delivery API');

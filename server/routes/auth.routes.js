@@ -1,5 +1,5 @@
 import express from "express";
-import { signUp,signIn,signOut, sendOtp, verifyOtp, resetPassword } from "../controllers/auth.controllers.js";
+import { signUp,signIn,signOut, sendOtp, verifyOtp, resetPassword, googleAuthStartHandler, googleAuthCallbackHandler } from "../controllers/auth.controllers.js";
 
 const authRoute = express.Router();
 
@@ -20,6 +20,12 @@ authRoute.post("/verify-otp", verifyOtp);
 
 // Reset Password route
 authRoute.post("/reset-password", resetPassword);
+
+// Google Sign In route
+authRoute.get("/google", googleAuthStartHandler);
+
+//Google Sign In callback route
+authRoute.get("/google/callback", googleAuthCallbackHandler);
 
 
 export default authRoute;

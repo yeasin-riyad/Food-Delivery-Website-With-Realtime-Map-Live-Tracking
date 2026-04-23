@@ -3,6 +3,7 @@ import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { motion } from "framer-motion";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
+import { Spinner } from "../components/Spinner";
 
 export default function MultiStepSignIn() {
   const primaryColor = "#ff4d2d";
@@ -11,6 +12,8 @@ export default function MultiStepSignIn() {
   const [view, setView] = useState("signin"); // signin | forgot | success
   const [step, setStep] = useState(1); // 1: email, 2: password
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -22,29 +25,44 @@ export default function MultiStepSignIn() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSignin = (e) => {
+  const handleSignin = async (e) => {
     e.preventDefault();
-    api.post("/api/auth/signin", formData)
-    .then(res => {
+    if(formData.email === "" || formData.password === ""){
+      setError("Please fill in all fields");
+      return;
+    }
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await api.post("/api/auth/signin", formData);
       alert("Signin successful! Token: " + res.data.token);
-    })
-    .catch(err => {
-      alert("Signin failed: " + err.response.data.message);
-    });
-  
+    } catch (err) {
+      setError(err.response?.data?.message || "Signin failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleForgotPassword = (e) => {
+  const handleForgotPassword = async (e) => {
     e.preventDefault();
-    api.post("/api/auth/send-otp", { email: formData.email })
-    .then(res => {
-      alert("OTP sent to email!");
+    if(formData.email === ""){
+      setError("Please enter your email");
+      return;
+    }
+    setError("");
+    setLoading(true);
+
+    try {
+      await api.post("/api/auth/send-otp", { email: formData.email });
       setView("success");
-    })
-    .catch(err => {
-      alert("Error: " + err.response.data.message);
-    });
-  }
+      setFormData({ email: "", password: "" });
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const nextStep = () => setStep((s) => Math.min(2, s + 1));
   const prevStep = () => setStep((s) => Math.max(1, s - 1));
@@ -104,6 +122,7 @@ export default function MultiStepSignIn() {
                       type={showPassword ? "text" : "password"}
                       name="password"
                       placeholder="Enter your password"
+                      required
                       value={formData.password}
                       onChange={handleChange}
                       className="w-full border px-3 py-3 rounded-xl focus:outline-none"
@@ -154,11 +173,12 @@ export default function MultiStepSignIn() {
                 </button>
               ) : (
                 <button
-                onClick={handleSignin}
-                  className="ml-auto px-5 py-2.5 rounded-xl text-white"
+                  onClick={handleSignin}
+                  disabled={loading}
+                  className="ml-auto px-5 py-2.5 rounded-xl text-white flex items-center justify-center gap-2 disabled:opacity-50"
                   style={{ backgroundColor: primaryColor }}
                 >
-                  Sign in
+                  {loading ? <Spinner /> : "Sign in"}
                 </button>
               )}
             </div>
@@ -174,17 +194,20 @@ export default function MultiStepSignIn() {
 
             <input
               type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
               placeholder="Enter your email"
-              className="w-full border px-3 py-3 rounded-xl mb-4 focus:outline-none"
-              style={{ border: `1px solid ${borderColor}` }}
+              className="w-full border px-3 py-3 rounded-xl mb-4"
             />
 
             <button
               onClick={handleForgotPassword}
-              className="w-full py-3 rounded-xl text-white"
+              disabled={loading}
+              className="w-full py-3 rounded-xl text-white flex items-center justify-center gap-2 disabled:opacity-50"
               style={{ backgroundColor: primaryColor }}
             >
-              Send OTP
+              {loading ? <Spinner /> : "Send OTP"}
             </button>
 
             <button
@@ -203,14 +226,12 @@ export default function MultiStepSignIn() {
         {/* ================= SUCCESS ================= */}
         {view === "success" && (
           <>
-            <p className="text-green-600 mb-6">
-              Otp sent! Check your email.
-            </p>
+            <p className="text-green-600 mb-6">Otp sent! Check your email.</p>
 
             <button
               onClick={() => {
-                navigate("/verify-otp",{
-                  state:{email: formData?.email}
+                navigate("/verify-otp", {
+                  state: { email: formData?.email },
                 });
               }}
               className="w-full py-3 rounded-xl text-white"
@@ -220,7 +241,11 @@ export default function MultiStepSignIn() {
             </button>
           </>
         )}
+        {error && (
+        <p className="mt-4 text-sm text-red-500 text-center">{error}</p>
+      )}
       </div>
+      
     </div>
   );
 }

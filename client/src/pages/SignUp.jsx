@@ -150,12 +150,12 @@
 
 // export default SignUp;
 
-
 import React, { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { motion } from "motion/react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
+import { Spinner } from "../components/Spinner";
 
 export default function MultiStepSignUp() {
   const primaryColor = "#ff4d2d";
@@ -163,6 +163,8 @@ export default function MultiStepSignUp() {
 
   const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -170,27 +172,57 @@ export default function MultiStepSignUp() {
     password: "",
     role: "user",
   });
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const validateEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  // Bangladesh mobile: 01XXXXXXXXX (11 digit)
+  const validateBDMobile = (mobile) => {
+    return /^01[3-9]\d{8}$/.test(mobile);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // 👉 এখানে formData-তে fullName, email, mobile, password, role সব আছে
-    if (!formData.fullName || !formData.email || !formData.mobile || !formData.password) {
-      alert("Please fill in all fields");
+    setError("");
+
+    if (
+      !formData.fullName ||
+      !formData.email ||
+      !formData.mobile ||
+      !formData.password
+    ) {
+      setError("Please fill in all fields");
       return;
     }
-    api.post("/api/auth/signup", formData)
-      .then((response) => {
-        // console.log(response.data);
-        navigate("/signin");
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+
+    // ✅ Email validation
+    if (!validateEmail(formData.email)) {
+      setError("Invalid email format");
+      return;
+    }
+
+    // ✅ Mobile validation
+    if (!validateBDMobile(formData.mobile)) {
+      setError("Enter valid BD number (e.g. 017XXXXXXXX)");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await api.post("/api/auth/signup", formData);
+      navigate("/signin");
+    } catch (err) {
+      setError(err.response?.data?.message || "Signup failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const nextStep = () => setStep((prev) => prev + 1);
@@ -255,15 +287,17 @@ export default function MultiStepSignUp() {
           {step === 2 && (
             <div className="space-y-4">
               <input
-                required
-                type="number"
+                type="tel"
+                maxLength={11}
                 inputMode="numeric"
                 name="mobile"
-                placeholder="Mobile Number"
-                value={formData?.mobile}
-                onChange={handleChange}
+                placeholder="Mobile Number (01XXXXXXXXX)"
+                value={formData.mobile}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, ""); // only digits
+                  setFormData({ ...formData, mobile: value });
+                }}
                 className="w-full border px-3 py-2 rounded-lg"
-                style={{ border: `1px solid ${borderColor}` }}
               />
 
               <div className="relative">
@@ -272,7 +306,7 @@ export default function MultiStepSignUp() {
                   name="password"
                   required
                   placeholder="Password"
-                 value={formData?.password}
+                  value={formData?.password}
                   onChange={handleChange}
                   className="w-full border px-3 py-2 rounded-lg"
                   style={{ border: `1px solid ${borderColor}` }}
@@ -317,10 +351,7 @@ export default function MultiStepSignUp() {
         {/* Buttons */}
         <div className="flex justify-between mt-6">
           {step > 1 && (
-            <button
-              onClick={prevStep}
-              className="px-4 py-2 rounded-lg border"
-            >
+            <button onClick={prevStep} className="px-4 py-2 rounded-lg border">
               Back
             </button>
           )}
@@ -328,21 +359,31 @@ export default function MultiStepSignUp() {
           {step < 3 ? (
             <button
               onClick={nextStep}
-              className="ml-auto px-4 py-2 rounded-lg text-white"
+              disabled={
+                (step === 1 &&
+                  (!formData.fullName || !validateEmail(formData.email))) ||
+                (step === 2 &&
+                  (!validateBDMobile(formData.mobile) || !formData.password))
+              }
+              className="ml-auto px-4 py-2 rounded-lg text-white disabled:opacity-50"
               style={{ backgroundColor: primaryColor }}
             >
               Next
             </button>
           ) : (
             <button
-            onClick={handleSubmit}
-              className="ml-auto px-4 py-2 rounded-lg text-white"
+              onClick={handleSubmit}
+              disabled={loading}
+              className="ml-auto px-4 py-2 rounded-lg text-white flex items-center gap-2 disabled:opacity-50"
               style={{ backgroundColor: primaryColor }}
             >
-              Create Account
+              {loading ? <Spinner /> : "Create Account"}
             </button>
           )}
         </div>
+        {error && (
+          <p className="mt-4 text-sm text-red-500 text-center">{error}</p>
+        )}
       </div>
     </div>
   );

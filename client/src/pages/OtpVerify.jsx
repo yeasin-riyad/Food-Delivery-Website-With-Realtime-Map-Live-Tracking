@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "../api";
 import { useEffect } from "react";
+import { Spinner } from "../components/Spinner";
 
 export default function OtpVerify() {
   const primaryColor = "#ff4d2d";
@@ -9,6 +10,8 @@ export default function OtpVerify() {
   const location = useLocation();
 
   const [otp, setOtp] = useState(["", "", "", ""]);
+  const [error, setError] = useState("");
+const [loading, setLoading] = useState(false);
 
   const handleChange = (value, index) => {
     if (!/^[0-9]*$/.test(value)) return;
@@ -24,19 +27,30 @@ export default function OtpVerify() {
   };
   const email = location.state?.email;
 
-  const handleVerifyOtp = (e) => {
-    e.preventDefault();
-    api.post("/api/auth/verify-otp", { otp: otp.join(""),email })
-    .then(res => {
-      alert("OTP verified! You can now reset your password.");
-      navigate("/reset-password",{
-        state: { email }
-      });
-    })
-    .catch(err => {
-      alert("OTP verification failed: " + err.response.data.message);
-    });
+  const handleVerifyOtp = async (e) => {
+  e.preventDefault();
+  if(otp.some((d) => d === "")){
+    setError("Please enter the complete OTP");
+    return;
   };
+  setError("");
+  setLoading(true);
+
+  try {
+    await api.post("/api/auth/verify-otp", {
+      otp: otp.join(""),
+      email,
+    });
+
+    navigate("/reset-password", {
+      state: { email },
+    });
+  } catch (err) {
+    setError(err.response?.data?.message || "OTP verification failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     if (!email) {
@@ -44,6 +58,11 @@ export default function OtpVerify() {
       navigate("/signin");
     }
   }, [email, navigate]);
+
+ // auto focus first input on mount
+  useEffect(() => {
+  document.getElementById("otp-0")?.focus();
+}, []);
 
 
   return (
@@ -75,13 +94,13 @@ export default function OtpVerify() {
         </div>
 
         <button
-        disabled={otp.some((d) => d === "")}
-        onClick={handleVerifyOtp}
-          className={`w-full py-3 rounded-xl text-white mb-3 ${otp.some((d) => d === "") ? "bg-gray-400 cursor-not-allowed" : ""}`}
-          style={{ backgroundColor: primaryColor }}
-        >
-          Verify OTP
-        </button>
+  disabled={otp.some((d) => d === "") || loading}
+  onClick={handleVerifyOtp}
+  className="w-full py-3 rounded-xl text-white mb-3 flex items-center justify-center gap-2 disabled:opacity-50"
+  style={{ backgroundColor: primaryColor }}
+>
+  {loading ? <Spinner /> : "Verify OTP"}
+</button>
 
         <p className="text-sm text-gray-500 mt-4">
           Didn’t receive code?{" "}
@@ -89,6 +108,11 @@ export default function OtpVerify() {
             Resend
           </span>
         </p>
+        {error && (
+  <p className="mt-3 text-sm text-red-500 text-center">
+    {error}
+  </p>
+)}
       </div>
     </div>
   );

@@ -2,15 +2,19 @@ import React, { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "../api";
+import { useEffect } from "react";
+import { Spinner } from "../components/Spinner";
 
 export default function ResetPassword() {
   const primaryColor = "#ff4d2d";
   const borderColor = "#ddd";
   const navigate = useNavigate();
-  const location=useLocation();
-  console.log(location.state?.email)
+  const location = useLocation();
+  console.log(location.state?.email);
 
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     password: "",
@@ -21,27 +25,44 @@ export default function ResetPassword() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleResetPassword = (e) => {
+  const handleResetPassword = async (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
+    if (formData.password === "" || formData.confirmPassword === "") {
+      setError("Please fill in all fields");
       return;
     }
-    api.post("/api/auth/reset-password", {email:location.state?.email, password: formData.password })
-    .then(res => {
-      alert("Password reset successful! Please sign in with your new password.");
+    setError("");
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match!");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await api.post("/api/auth/reset-password", {
+        email: location.state?.email,
+        password: formData.password,
+      });
+
       navigate("/signin");
-    })
-    .catch(err => {
-      alert("Error: " + err.response.data.message);
-    });
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to reset password");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  useEffect(() => {
+    if (!location.state?.email) {
+      navigate("/signin");
+    }
+  }, [location, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-[#fff9f6]">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 sm:p-8">
-
         <h1 className="text-3xl font-bold mb-2" style={{ color: primaryColor }}>
           Set New Password
         </h1>
@@ -82,15 +103,23 @@ export default function ResetPassword() {
         />
 
         <button
-        disabled={!formData.password || formData.password !== formData.confirmPassword}
-     
-          className={`w-full py-3 rounded-xl text-white mb-3 ${!formData.password || formData.password !== formData.confirmPassword ? "bg-gray-400 cursor-not-allowed" : ""}`}  
-
+          disabled={
+            loading ||
+            !formData.password ||
+            formData.password !== formData.confirmPassword
+          }
+          onClick={handleResetPassword}
+          className="w-full py-3 rounded-xl text-white mb-3 flex items-center justify-center gap-2 disabled:opacity-50"
           style={{ backgroundColor: primaryColor }}
-            onClick={handleResetPassword}
         >
-          Update Password
+          {loading ? <Spinner /> : "Update Password"}
         </button>
+
+        {error && (
+  <p className="text-red-500 text-sm text-center mt-2">
+    {error}
+  </p>
+)}
       </div>
     </div>
   );
