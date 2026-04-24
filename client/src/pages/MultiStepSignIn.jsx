@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
 import { Spinner } from "../components/Spinner";
+import { useDispatch } from "react-redux";
+import { setUserData } from "../redux/userSlice";
 
 export default function MultiStepSignIn() {
   const primaryColor = "#ff4d2d";
@@ -15,6 +17,7 @@ export default function MultiStepSignIn() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -36,7 +39,7 @@ export default function MultiStepSignIn() {
 
     try {
       const res = await api.post("/api/auth/signin", formData);
-      alert("Signin successful! Token: " + res.data.token);
+        dispatch(setUserData(res?.data?.user));
     } catch (err) {
       setError(err.response?.data?.message || "Signin failed");
     } finally {

@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 const isAuth=(req,res,next)=>{
   const token = req.cookies.token;
   if (!token) {
@@ -11,6 +12,7 @@ const isAuth=(req,res,next)=>{
     req.userId = decoded.userId;
     next();
   } catch (error) {
+    console.log(error,"error in isAuth middleware");
     return res.status(401).json({ message: "Unauthorized: Invalid   token" });
   }
 };

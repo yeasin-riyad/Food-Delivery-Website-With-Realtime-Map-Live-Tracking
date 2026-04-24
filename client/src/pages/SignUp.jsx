@@ -156,6 +156,8 @@ import { motion } from "motion/react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
 import { Spinner } from "../components/Spinner";
+import { useDispatch } from "react-redux";
+import { setUserData } from "../redux/userSlice";
 
 export default function MultiStepSignUp() {
   const primaryColor = "#ff4d2d";
@@ -173,6 +175,7 @@ export default function MultiStepSignUp() {
     role: "user",
   });
   const navigate = useNavigate();
+  const dispatch=useDispatch();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -216,7 +219,8 @@ export default function MultiStepSignUp() {
     setLoading(true);
 
     try {
-      await api.post("/api/auth/signup", formData);
+     const result= await api.post("/api/auth/signup", formData);
+      dispatch(setUserData(result.data));
       navigate("/signin");
     } catch (err) {
       setError(err.response?.data?.message || "Signup failed");

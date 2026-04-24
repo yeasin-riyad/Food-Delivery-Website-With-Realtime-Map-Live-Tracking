@@ -257,7 +257,10 @@ export async function googleAuthCallbackHandler(req, res) {
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
-    return res.json({ message: "Google login successful", user, token });
+    // return res.json({ message: "Google login successful", user, token });
+    res.redirect(
+  `${process.env.CLIENT_URL}/oauth-success?token=${token}&email=${normalizedEmail}&name=${fullName}`
+);
 
   } catch (err) {
     console.log(err);

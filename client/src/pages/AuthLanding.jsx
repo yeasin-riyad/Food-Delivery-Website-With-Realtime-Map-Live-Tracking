@@ -4,6 +4,7 @@ import { FcGoogle } from "react-icons/fc";
 import api from "../api";
 import { useState } from "react";
 import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 
 export default function AuthLanding() {
       const primaryColor = "#ff4d2d";
@@ -12,11 +13,13 @@ export default function AuthLanding() {
   const location = useLocation();
 
   const [error, setError] = useState("");
+  const dispatch = useDispatch();
 
   const handleGoogleLogin = () => {
     try {
       setError("");
-      window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/google`;
+      const data= window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/google`;
+      console.log(data,"Google login URL");
     } catch {
       setError("Failed to start Google login");
     }
