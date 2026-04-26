@@ -7,8 +7,14 @@ const itemSchema = new mongoose.Schema(
       required: true,
     },
     image: {
-      type: String,
-      required: true,
+      url: {
+        type: String,
+        required: true,
+      },
+      public_id: {
+        type: String,
+        required: true,
+      },
     },
     shop: {
       type: mongoose.Schema.Types.ObjectId,
@@ -33,29 +39,26 @@ const itemSchema = new mongoose.Schema(
         "Biryani & Polao",
         "Bhuna & Curry",
         "Street Food",
-        "Fast Food",
-        "Snacks",
         "BBQ & Grill",
-        "Desserts",
         "Drinks",
         "Breakfast",
         "Others",
       ],
-      required:true
+      required: true,
     },
-    price:{
-        type:Number,
-        min:0,
-        required:true
+    price: {
+      type: Number,
+      min: 0,
+      required: true,
     },
-    foodType:{
-        type:String,
-        enum:["veg","non veg"],
-        required:true
-    }
+    foodType: {
+      type: String,
+      enum: ["veg", "non veg"],
+      required: true,
+    },
   },
   { timestamps: true },
 );
 
-const Item=mongoose.model("Item",itemSchema);
+const Item = mongoose.model("Item", itemSchema);
 export default Item;

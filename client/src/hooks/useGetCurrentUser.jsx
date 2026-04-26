@@ -25,7 +25,7 @@ function useGetCurrentUser() {
       }
     };
     fetchCurrentUser();
-  }, []);
+  }, [dispatch]);
 
   return { user, loading, error };
 }

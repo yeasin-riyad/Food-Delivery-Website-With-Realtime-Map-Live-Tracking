@@ -7,6 +7,8 @@ import cookieParser from 'cookie-parser';
 import authRoute from './routes/auth.routes.js';
 import { verifySMTP } from './utils/mail.js';
 import userRouter from './routes/user.routes.js';
+import shopRouter from './routes/shop.routes.js';
+import itemRouter from './routes/item.routes.js';
 
 
 
@@ -46,6 +48,8 @@ app.use(cookieParser());
 // Use the authentication routes
 app.use('/api/auth', authRoute);
 app.use('/api/user', userRouter);
+app.use('/api/shop',shopRouter);
+app.use('/api/item',itemRouter);
 // Define a simple route for testing
 app.get('/', (req, res) => {
     res.send('Welcome to the Food Delivery API');
